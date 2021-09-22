@@ -76,8 +76,8 @@ import pickle
 #     jp_values = json.load(f)
 
 # name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/goal_1/goal1.pickle'
-name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/joint_test_1.pickle'  ### change the file path
-
+# name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/joint_test_1.pickle'  ### change the file path
+name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/test_1.pickle'  ### change the file path
 with open(name,'rb') as fp:
     jp_values = pickle.load(fp)
 
@@ -163,7 +163,7 @@ class ControllerInterface:
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('--one', action='store', dest='run_psm_one', help='Control PSM1', default=True) ## if use PSM1, change False to True
+    parser.add_argument('--one', action='store', dest='run_psm_one', help='Control PSM1', default=False) ## if use PSM1, change False to True
     parser.add_argument('--two', action='store', dest='run_psm_two', help='Control PSM2', default=True)
     parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=False) ## if use PSM3, change False to True
 

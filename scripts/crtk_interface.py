@@ -45,13 +45,11 @@ import rospy
 from ambf_client import Client
 import psm_arm
 import ecm_arm
-import scene
 import time
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import TransformStamped, Transform, TwistStamped
 from PyKDL import Rotation, Vector, Frame
 from argparse import ArgumentParser
-from surgical_robotics_challenge.utils.utilities import get_boolean_from_opt
 
 
 def rot_mat_to_quat(cp):
@@ -94,7 +92,6 @@ class Options:
     run_psm_two = True
     run_psm_three = False
     run_ecm = True
-    run_scene = True
     namespace = '/CRTK'
     rate = 120
 
@@ -170,7 +167,6 @@ class ECMCRTKWrapper:
         self.arm_name = name
         self.namespace = namespace
         self.arm = ecm_arm.ECM(client, 'CameraFrame')
-        self._servo_jp_cmd = [0.0, 0.0, 0.0, 0.0]
         time.sleep(0.1)
 
         self.measured_js_pub = rospy.Publisher(namespace + '/' + name + '/' + 'measured_js', JointState,
@@ -182,11 +178,11 @@ class ECMCRTKWrapper:
         self.servo_jp_sub = rospy.Subscriber(namespace + '/' + name + '/' + 'servo_jp', JointState,
                                              self.servo_jp_cb, queue_size=1)
 
-        # self.servo_jv_sub = rospy.Subscriber(namespace + '/' + name + '/' + 'servo_jv', JointState,
-        #                                      self.servo_jv_cb, queue_size=1)
+        self.servo_jv_sub = rospy.Subscriber(namespace + '/' + name + '/' + 'servo_jv', JointState,
+                                             self.servo_jv_cb, queue_size=1)
 
-        # self.servo_cp_sub = rospy.Subscriber(namespace + '/' + name + '/' + 'servo_cp', TransformStamped,
-        #                                      self.servo_cp_cb, queue_size=1)
+        self.servo_cp_sub = rospy.Subscriber(namespace + '/' + name + '/' + 'servo_cp', TransformStamped,
+                                             self.servo_cp_cb, queue_size=1)
 
         self._measured_js_msg = JointState()
         self._measured_js_msg.name = ["j0", "j1", "j2", "j3"]
@@ -197,15 +193,15 @@ class ECMCRTKWrapper:
         self._measured_cv_msg = TwistStamped()
         self._measured_cv_msg.header.frame_id = 'world'
 
-    # def servo_cp_cb(self, cp):
-    #     frame = transform_to_frame(cp.transform)
-    #     self.arm.servo_cp(frame)
+    def servo_cp_cb(self, cp):
+        frame = transform_to_frame(cp.transform)
+        self.arm.servo_cp(frame)
 
     def servo_jp_cb(self, js):
-        self._servo_jp_cmd = js.position
+        self.arm.servo_jp(js.position)
 
-    # def servo_jv_cb(self, js):
-    #     self.arm.servo_jv(js.velocity)
+    def servo_jv_cb(self, js):
+        self.arm.servo_jv(js.velocity)
 
     def publish_js(self):
         self._measured_js_msg.position = self.arm.measured_jp()
@@ -218,133 +214,40 @@ class ECMCRTKWrapper:
     def run(self):
         self.publish_js()
         self.publish_cs()
-        self.arm.servo_jp(self._servo_jp_cmd)
 
 
-class SceneCRTKWrapper:
-    def __init__(self, client, namespace):
-        self.namespace = namespace
-        self.scene = scene.Scene(client)
-
-        self.needle_cp_pub = rospy.Publisher(namespace + '/' + 'Needle' + '/' + 'measured_cp', TransformStamped,
-                                               queue_size=1)
-
-        self.entry1_cp_pub = rospy.Publisher(namespace + '/' + 'Entry1' + '/' + 'measured_cp', TransformStamped,
-                                               queue_size=1)
-
-        self.entry2_cp_pub = rospy.Publisher(namespace + '/' + 'Entry2' + '/' + 'measured_cp', TransformStamped,
-                                               queue_size=1)
-
-        self.entry3_cp_pub = rospy.Publisher(namespace + '/' + 'Entry3' + '/' + 'measured_cp', TransformStamped,
-                                               queue_size=1)
-
-        self.entry4_cp_pub = rospy.Publisher(namespace + '/' + 'Entry4' + '/' + 'measured_cp', TransformStamped,
-                                               queue_size=1)
-
-        self.exit1_cp_pub = rospy.Publisher(namespace + '/' + 'Exit1' + '/' + 'measured_cp', TransformStamped,
-                                               queue_size=1)
-
-        self.exit2_cp_pub = rospy.Publisher(namespace + '/' + 'Exit2' + '/' + 'measured_cp', TransformStamped,
-                                               queue_size=1)
-
-        self.exit3_cp_pub = rospy.Publisher(namespace + '/' + 'Exit3' + '/' + 'measured_cp', TransformStamped,
-                                               queue_size=1)
-
-        self.exit4_cp_pub = rospy.Publisher(namespace + '/' + 'Exit4' + '/' + 'measured_cp', TransformStamped,
-                                               queue_size=1)
-
-        self._needle_cp_msg = TransformStamped()
-        self._needle_cp_msg.header.frame_id = 'World'
-
-        self._entry1_cp_msg = TransformStamped()
-        self._entry1_cp_msg.header.frame_id = 'World'
-
-        self._entry2_cp_msg = TransformStamped()
-        self._entry2_cp_msg.header.frame_id = 'World'
-
-        self._entry3_cp_msg = TransformStamped()
-        self._entry3_cp_msg.header.frame_id = 'World'
-
-        self._entry4_cp_msg = TransformStamped()
-        self._entry4_cp_msg.header.frame_id = 'World'
-
-        self._exit1_cp_msg = TransformStamped()
-        self._exit1_cp_msg.header.frame_id = 'World'
-
-        self._exit2_cp_msg = TransformStamped()
-        self._exit2_cp_msg.header.frame_id = 'World'
-
-        self._exit3_cp_msg = TransformStamped()
-        self._exit3_cp_msg.header.frame_id = 'World'
-
-        self._exit4_cp_msg = TransformStamped()
-        self._exit4_cp_msg.header.frame_id = 'World'
-
-    def publish_cs(self):
-        self._needle_cp_msg.transform = np_mat_to_transform(self.scene.needle_measured_cp())
-        self.needle_cp_pub.publish(self._needle_cp_msg)
-
-        self._entry1_cp_msg.transform = np_mat_to_transform(self.scene.entry1_measured_cp())
-        self.entry1_cp_pub.publish(self._entry1_cp_msg)
-
-        self._entry2_cp_msg.transform = np_mat_to_transform(self.scene.entry2_measured_cp())
-        self.entry2_cp_pub.publish(self._entry2_cp_msg)
-
-        self._entry3_cp_msg.transform = np_mat_to_transform(self.scene.entry3_measured_cp())
-        self.entry3_cp_pub.publish(self._entry3_cp_msg)
-
-        self._entry4_cp_msg.transform = np_mat_to_transform(self.scene.entry4_measured_cp())
-        self.entry4_cp_pub.publish(self._entry4_cp_msg)
-
-        self._exit1_cp_msg.transform = np_mat_to_transform(self.scene.exit1_measured_cp())
-        self.exit1_cp_pub.publish(self._exit1_cp_msg)
-
-        self._exit2_cp_msg.transform = np_mat_to_transform(self.scene.exit2_measured_cp())
-        self.exit2_cp_pub.publish(self._exit2_cp_msg)
-
-        self._exit3_cp_msg.transform = np_mat_to_transform(self.scene.exit3_measured_cp())
-        self.exit3_cp_pub.publish(self._exit3_cp_msg)
-
-        self._exit4_cp_msg.transform = np_mat_to_transform(self.scene.exit4_measured_cp())
-        self.exit4_cp_pub.publish(self._exit4_cp_msg)
-
-    def run(self):
-        self.publish_cs()
-
-
-class SceneManager:
+class ArmManager:
     def __init__(self, options):
+        if options.run_psm_one is False and options.run_psm_two is False and options.run_psm_three is False:
+            raise "Atleast one PSM arm has to be specified"
+
         self.client = Client("ambf_surgical_sim_crtk_node")
         self.client.connect()
         time.sleep(0.2)
-        self._components = []
+        self._arms = []
         if options.run_psm_one is True:
             print("Launching CRTK-ROS Interface for PSM1 ")
             psm1 = PSMCRTKWrapper(self.client, 'psm1', options.namespace)
-            self._components.append(psm1)
+            self._arms.append(psm1)
         if options.run_psm_two is True:
             print("Launching CRTK-ROS Interface for PSM2 ")
             psm2 = PSMCRTKWrapper(self.client, 'psm2', options.namespace)
-            self._components.append(psm2)
+            self._arms.append(psm2)
         if options.run_psm_three is True:
             print("Launching CRTK-ROS Interface for PSM3 ")
             psm3 = PSMCRTKWrapper(self.client, 'psm3', options.namespace)
-            self._components.append(psm3)
+            self._arms.append(psm3)
         if options.run_ecm:
             print("Launching CRTK-ROS Interface for ECM ")
             ecm = ECMCRTKWrapper(self.client, 'ecm', options.namespace)
-            self._components.append(ecm)
-        if options.run_scene:
-            print("Launching CRTK-ROS Interface for Scene ")
-            scene = SceneCRTKWrapper(self.client, options.namespace)
-            self._components.append(scene)
+            self._arms.append(ecm)
 
         self._rate = rospy.Rate(options.rate)
 
     def run(self):
         while not rospy.is_shutdown():
-            for comp in self._components:
-                comp.run()
+            for arm in self._arms:
+                arm.run()
             self._rate.sleep()
 
 
@@ -354,7 +257,6 @@ if __name__ == "__main__":
     parser.add_argument('--two', action='store', dest='run_psm_two', help='RUN PSM2', default=True)
     parser.add_argument('--three', action='store', dest='run_psm_three', help='RUN PSM3', default=False)
     parser.add_argument('--ecm', action='store', dest='run_ecm', help='RUN ECM', default=True)
-    parser.add_argument('--scene', action='store', dest='run_scene', help='RUN Scene', default=True)
     parser.add_argument('--ns', action='store', dest='namespace', help='Namespace', default='/CRTK')
     parser.add_argument('--rate', action='store', dest='rate', help='Rate of Publishing', default=120)
 
@@ -362,18 +264,32 @@ if __name__ == "__main__":
     print('Specified Arguments')
     print(parsed_args)
     options = Options()
+    options.run_psm_one = True
+    options.run_psm2 = False
+    options.run_psm3 = False
 
-    options.run_psm_one = get_boolean_from_opt(parsed_args.run_psm_one)
-    options.run_psm_two = get_boolean_from_opt(parsed_args.run_psm_two)
-    options.run_psm_three = get_boolean_from_opt(parsed_args.run_psm_three)
-    options.run_ecm = get_boolean_from_opt(parsed_args.run_ecm)
-    options.run_scene = get_boolean_from_opt(parsed_args.run_scene)
+    if parsed_args.run_psm_one in ['True', 'true', '1']:
+        options.run_psm_one = True
+    elif parsed_args.run_psm_one in ['False', 'false', '0']:
+        options.run_psm_one = True
+    if parsed_args.run_psm_two in ['True', 'true', '1']:
+        options.run_psm_two = True
+    elif parsed_args.run_psm_two in ['False', 'false', '0']:
+        options.run_psm_two = False
+    if parsed_args.run_psm_three in ['True', 'true', '1']:
+        options.run_psm_three = True
+    elif parsed_args.run_psm_three in ['False', 'false', '0']:
+        options.run_psm_three = False
+    if parsed_args.run_ecm in ['True', 'true', '1']:
+        options.run_ecm = True
+    elif parsed_args.run_ecm in ['False', 'false', '0']:
+        options.run_ecm = False
 
     options.namespace = parsed_args.namespace
     options.rate = parsed_args.rate
 
-    sceneManager = SceneManager(options)
-    sceneManager.run()
+    armManager = ArmManager(options)
+    armManager.run()
 
 
 

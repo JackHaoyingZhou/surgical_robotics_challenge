@@ -42,23 +42,31 @@
 #     \version   1.0
 # */
 # //==============================================================================
-from surgical_robotics_challenge.kinematics.psmIK import *
+from psmIK import *
 from ambf_client import Client
-from surgical_robotics_challenge.psm_arm import PSM
+from psm_arm import PSM
 import time
 import rospy
 from PyKDL import Frame, Rotation, Vector
 from argparse import ArgumentParser
-from surgical_robotics_challenge.utils.obj_control_gui import ObjectGUI
-from surgical_robotics_challenge.utils.jnt_control_gui import JointGUI
-from surgical_robotics_challenge.ecm_arm import ECM
-from surgical_robotics_challenge.utils.utilities import get_boolean_from_opt
+from obj_control_gui import ObjectGUI
+from camera import Camera
 
-class PSMController:
-    def __init__(self, gui_handle, arm):
+
+class GUIController:
+    def __init__(self, gui_handle, arm, camera):
         self.counter = 0
         self.GUI = gui_handle
         self.arm = arm
+        self._camera = camera
+        self._cam_gui = ObjectGUI('camera vel control')
+
+    def update_camera_pose(self):
+        self._cam_gui.App.update()
+        twist = np.array([self._cam_gui.x, self._cam_gui.y, self._cam_gui.z,
+                          self._cam_gui.ro, self._cam_gui.pi, self._cam_gui.ya])
+        if np.linalg.norm(twist) > 0.0001:
+            self._camera.move_cv(twist, 0.005)
 
     def update_arm_pose(self):
         gui = self.GUI
@@ -84,22 +92,9 @@ class PSMController:
             self.arm.target_FK.set_rpy(T_t_w.M.GetRPY()[0], T_t_w.M.GetRPY()[1], T_t_w.M.GetRPY()[2])
 
     def run(self):
+            self.update_camera_pose()
             self.update_arm_pose()
             self.update_visual_markers()
-
-
-class ECMController:
-    def __init__(self, gui, ecm):
-        self.counter = 0
-        self._ecm = ecm
-        self._cam_gui = gui
-
-    def update_camera_pose(self):
-        self._cam_gui.App.update()
-        self._ecm.servo_jp(self._cam_gui.jnt_cmds)
-
-    def run(self):
-            self.update_camera_pose()
 
 
 if __name__ == "__main__":
@@ -107,22 +102,33 @@ if __name__ == "__main__":
     parser.add_argument('-c', action='store', dest='client_name', help='Client Name', default='ambf_client')
     parser.add_argument('--one', action='store', dest='run_psm_one', help='Control PSM1', default=True)
     parser.add_argument('--two', action='store', dest='run_psm_two', help='Control PSM2', default=True)
-    parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=False)
-    parser.add_argument('--ecm', action='store', dest='run_ecm', help='Control ECM', default=True)
+    parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=True)
 
     parsed_args = parser.parse_args()
     print('Specified Arguments')
     print(parsed_args)
 
-    parsed_args.run_psm_one = get_boolean_from_opt(parsed_args.run_psm_one)
-    parsed_args.run_psm_two = get_boolean_from_opt(parsed_args.run_psm_two)
-    parsed_args.run_psm_three = get_boolean_from_opt(parsed_args.run_psm_three)
-    parsed_args.run_ecm = get_boolean_from_opt(parsed_args.run_ecm)
+    if parsed_args.run_psm_one in ['True', 'true', '1']:
+        parsed_args.run_psm_one = True
+    elif parsed_args.run_psm_one in ['False', 'false', '0']:
+        parsed_args.run_psm_one = False
+
+    if parsed_args.run_psm_two in ['True', 'true', '1']:
+        parsed_args.run_psm_two = True
+    elif parsed_args.run_psm_two in ['False', 'false', '0']:
+        parsed_args.run_psm_two = False
+
+    if parsed_args.run_psm_three in ['True', 'true', '1']:
+        parsed_args.run_psm_three = True
+    elif parsed_args.run_psm_three in ['False', 'false', '0']:
+        parsed_args.run_psm_three = False
 
     c = Client(parsed_args.client_name)
     c.connect()
 
+    cam = Camera(c, 'CameraFrame')
     time.sleep(0.5)
+
     controllers = []
 
     if parsed_args.run_psm_one is True:
@@ -135,7 +141,7 @@ if __name__ == "__main__":
             init_xyz = [0, 0, -1.0]
             init_rpy = [3.14, 0, 1.57079]
             gui = ObjectGUI(arm_name + '/baselink', init_xyz, init_rpy, 3.0, 10.0, 0.000001)
-            controller = PSMController(gui, psm)
+            controller = GUIController(gui, psm, cam)
             controllers.append(controller)
 
     if parsed_args.run_psm_two is True:
@@ -147,7 +153,7 @@ if __name__ == "__main__":
             init_xyz = [0, 0.0, -1.0]
             init_rpy = [3.14, 0, 1.57079]
             gui = ObjectGUI(arm_name + '/baselink', init_xyz, init_rpy, 3.0, 12, 0.000001)
-            controller = PSMController(gui, psm)
+            controller = GUIController(gui, psm, cam)
             controllers.append(controller)
 
     if parsed_args.run_psm_three is True:
@@ -159,15 +165,8 @@ if __name__ == "__main__":
             init_xyz = [0, 0.0, -1.0]
             init_rpy = [3.14, 0, 1.57079]
             gui = ObjectGUI(arm_name + '/baselink', init_xyz, init_rpy, 3.0, 3.14, 0.000001)
-            controller = PSMController(gui, psm)
+            controller = GUIController(gui, psm, cam)
             controllers.append(controller)
-
-    if parsed_args.run_ecm is True:
-        arm_name = 'CameraFrame'
-        ecm = ECM(c, arm_name)
-        gui = JointGUI('ECM JP', 4, ["ecm j0", "ecm j1", "ecm j2", "ecm j3"])
-        controller = ECMController(gui, ecm)
-        controllers.append(controller)
 
     if len(controllers) == 0:
         print('No Valid PSM Arms Specified')

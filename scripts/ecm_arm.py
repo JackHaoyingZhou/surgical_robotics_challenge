@@ -42,26 +42,27 @@
 #     \version   1.0
 # */
 # //==============================================================================
-from surgical_robotics_challenge.kinematics.psmIK import *
+from ecmFK import *
 from PyKDL import Frame, Rotation, Vector, Twist
 import time
 
 
-class Camera:
+class ECM:
     def __init__(self, client, name):
         self.client = client
         self.name = name
         self.camera_handle = self.client.get_obj_handle(name)
-        time.sleep(0.5)
+        time.sleep(0.1)
 
-        # Transform of Base in World
+        # Transform of Camera in World
         self._T_c_w = None
-        # Transform of World in Base
+        # Transform of World in Camera
         self._T_w_c = None
         self._pose_changed = True
-        self._num_joints = 6
-        self._ik_solution = np.zeros([self._num_joints])
-        self._last_jp = np.zeros([self._num_joints])
+        self._num_joints = 5
+        self._update_camera_pose()
+        self._T_c_w_init = self._T_c_w
+        self._measured_jp = [.0, .0, .0, .0]
 
     def is_present(self):
         if self.camera_handle is None:
@@ -93,7 +94,7 @@ class Camera:
             self._T_w_c = self._T_c_w.Inverse()
             self._pose_changed = False
 
-    def move_cp(self, T_c_w):
+    def servo_cp(self, T_c_w):
         if type(T_c_w) in [np.matrix, np.array]:
             T_c_w = convert_mat_to_frame(T_c_w)
 
@@ -102,7 +103,7 @@ class Camera:
         self.camera_handle.set_rpy(rpy[0], rpy[1], rpy[2])
         self._pose_changed = True
 
-    def move_cv(self, twist, dt):
+    def servo_cv(self, twist, dt):
         if type(twist) in [np.array, np.ndarray]:
             v = Vector(twist[0], twist[1], twist[2]) * dt
             w = Vector(twist[3], twist[4], twist[5]) * dt
@@ -114,9 +115,22 @@ class Camera:
 
         T_c_w = self.get_T_c_w()
         T_cmd = Frame(Rotation.RPY(w[0], w[1], w[2]), v)
-        self.move_cp(T_c_w * T_cmd)
+        self.servo_cp(T_c_w * T_cmd)
         pass
+
+    def servo_jp(self, jp):
+        j0 = jp[0]
+        j1 = jp[1]
+        j2 = jp[2]
+        j3 = jp[3]
+        self._measured_jp = [j0, j1, j2, j3]
+        cmd = [j0, j1, j2, j3, 0.0] # Add 0 to compute the added fifth frame
+        T_t_c = convert_mat_to_frame(compute_FK(cmd)) # Tip if camera frame
+        self.servo_cp(self._T_c_w_init * T_t_c)
 
     def measured_cp(self):
         return self.get_T_c_w()
+
+    def measured_jp(self):
+        return self._measured_jp
 
