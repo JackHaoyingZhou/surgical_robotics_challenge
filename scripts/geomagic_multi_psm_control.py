@@ -52,11 +52,14 @@ from PyKDL import Frame, Rotation, Vector
 from argparse import ArgumentParser
 from geomagic_device import GeomagicDevice
 from itertools import cycle
-from psm_arm import jpRecorder
 from jnt_control_gui import JointGUI
+from joint_pos_recorder import JointPosRecorder
+
+jpRecorder = JointPosRecorder(save_path = './task3_data/1', record_size = 500)
 
 class ControllerInterface:
-    def __init__(self, leader, psm_arms, camera):
+    def __init__(self, leader, psm_arms, camera,save_jp=False):
+        self.save_jp = save_jp
         self.counter = 0
         self.leader = leader
         self.psm_arms = cycle(psm_arms)
@@ -98,6 +101,12 @@ class ControllerInterface:
         self.T_IK = Frame(self.cmd_rpy, self.cmd_xyz)
         self.active_psm.servo_cp(self.T_IK)
         self.active_psm.set_jaw_angle(self.leader.get_jaw_angle())
+        if self.save_jp:
+            record_list = []
+            record_list.append(self.active_psm.name)
+            record_list.append(self.active_psm.measured_jp())
+            record_list.append(self.leader.get_jaw_angle())
+            jpRecorder.record(record_list)
 
     def update_visual_markers(self):
         # Move the Target Position Based on the GUI
@@ -129,7 +138,7 @@ if __name__ == "__main__":
     parser.add_argument('--one', action='store', dest='run_psm_one', help='Control PSM1', default=True)
     parser.add_argument('--two', action='store', dest='run_psm_two', help='Control PSM2', default=True)
     parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=True)
-    parser.add_argument('--save', action='store', dest='jp_record', help='save using jp_recorder', default=False)
+    parser.add_argument('--save', action='store', dest='jp_record', help='save using jp_recorder', default=True) ###default as False
 
     parsed_args = parser.parse_args()
     print('Specified Arguments')
@@ -169,7 +178,7 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm1'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name,parsed_args.jp_record)
+        psm = PSM(c, arm_name)
         if psm.is_present():
             T_psmtip_c = Frame(Rotation.RPY(3.14, 0.0, -1.57079), Vector(-0.2, 0.0, -1.0))
             T_psmtip_b = psm.get_T_w_b() * cam.get_T_c_w() * T_psmtip_c
@@ -181,7 +190,7 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm2'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name,parsed_args.jp_record)
+        psm = PSM(c, arm_name)
         if psm.is_present():
             T_psmtip_c = Frame(Rotation.RPY(3.14, 0.0, -1.57079), Vector(0.2, 0.0, -1.0))
             T_psmtip_b = psm.get_T_w_b() * cam.get_T_c_w() * T_psmtip_c
@@ -193,7 +202,7 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm3'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name,parsed_args.jp_record)
+        psm = PSM(c, arm_name)
         if psm.is_present():
             psm_arms.append(psm)
 
@@ -209,7 +218,7 @@ if __name__ == "__main__":
         theta_tip = -theta_base
         leader.set_base_frame(Frame(Rotation.RPY(theta_base, 0, 0), Vector(0, 0, 0)))
         leader.set_tip_frame(Frame(Rotation.RPY(theta_base + theta_tip, 0, 0), Vector(0, 0, 0)))
-        controller = ControllerInterface(leader, psm_arms, cam)
+        controller = ControllerInterface(leader, psm_arms, cam, parsed_args.jp_record)
         controllers.append(controller)
         while not rospy.is_shutdown():
             try:

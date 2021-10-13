@@ -59,7 +59,6 @@ from PyKDL import Frame, Rotation, Vector
 from argparse import ArgumentParser
 from itertools import cycle
 from jnt_control_gui import JointGUI
-from psm_arm import jpRecorder
 from direct_device import DirectDevice
 import json
 import pickle
@@ -75,18 +74,20 @@ import pickle
 # with open('result_try') as f:
 #     jp_values = json.load(f)
 
-# name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/goal_1/goal1.pickle'
+name = '/home/jackzhy/catkin_ws/src/surgical_robotics_challenge/scripts/task3_data/1/test_1'
 # name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/joint_test_1.pickle'  ### change the file path
-name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/test_1.pickle'  ### change the file path
+# name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/test_1.pickle'  ### change the file path
 with open(name,'rb') as fp:
-    jp_values = pickle.load(fp)
+    name_values, jp_values = pickle.load(fp)
 
 class ControllerInterface:
     def __init__(self, leader, psm_arms, camera):
         self.counter = 0
         self.leader = leader
-        self.psm_arms = cycle(psm_arms)
-        self.active_psm = next(self.psm_arms)
+        # self.psm_arms = cycle(psm_arms)
+        # self.active_psm = next(self.psm_arms)
+        self.psm_arms = psm_arms
+        self.active_psm = self.psm_arms[1]
         self.gui = JointGUI('ECM JP', 4, ["ecm j0", "ecm j1", "ecm j2", "ecm j3"])
         self.jp_values = jp_values
 
@@ -129,9 +130,12 @@ class ControllerInterface:
             print('Finish running!\n')
             self.counter = self.counter + 1
         elif self.counter < len(self.jp_values):
-            self.active_psm.servo_jp(self.jp_values[self.counter])
-            self.active_psm.set_jaw_angle(0.0)
-            self.active_psm.run_grasp_logic(0.0)
+            if name_values[self.counter] == 'psm1':
+                self.active_psm = self.psm_arms[0]
+            if name_values[self.counter] == 'psm2':
+                self.active_psm = self.psm_arms[1]
+            self.active_psm.servo_jp(self.jp_values[self.counter][0:6])
+            self.active_psm.set_jaw_angle(self.jp_values[self.counter][6])
             self.counter = self.counter + 1
         else:
             pass
@@ -163,9 +167,9 @@ class ControllerInterface:
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('--one', action='store', dest='run_psm_one', help='Control PSM1', default=False) ## if use PSM1, change False to True
+    parser.add_argument('--one', action='store', dest='run_psm_one', help='Control PSM1', default=True) ## if use PSM1, change False to True
     parser.add_argument('--two', action='store', dest='run_psm_two', help='Control PSM2', default=True)
-    parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=False) ## if use PSM3, change False to True
+    parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=True) ## if use PSM3, change False to True
 
     parsed_args = parser.parse_args()
     print('Specified Arguments')
@@ -199,7 +203,7 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm1'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name, False)
+        psm = PSM(c, arm_name)
         if psm.is_present():
             T_psmtip_c = Frame(Rotation.RPY(3.14, 0.0, -1.57079), Vector(-0.2, 0.0, -1.0))
             T_psmtip_b = psm.get_T_w_b() * cam.get_T_c_w() * T_psmtip_c
@@ -211,7 +215,7 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm2'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name, False)
+        psm = PSM(c, arm_name)
         if psm.is_present():
             T_psmtip_c = Frame(Rotation.RPY(3.14, 0.0, -1.57079), Vector(0.2, 0.0, -1.0))
             T_psmtip_b = psm.get_T_w_b() * cam.get_T_c_w() * T_psmtip_c
@@ -223,7 +227,7 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm3'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name, False)
+        psm = PSM(c, arm_name)
         if psm.is_present():
             psm_arms.append(psm)
 
@@ -246,7 +250,7 @@ if __name__ == "__main__":
                 for cont in controllers:
                     cont.run()
             except KeyboardInterrupt:
-                    jpRecorder.flush()
+                    print('stop!')
             rate.sleep()
 
 

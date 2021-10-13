@@ -9,8 +9,8 @@ for i in range(len(m)):
     for j in range(len(m[0])):
         jp_values.append(m[i][j]['pos'])
 #
-with open('multi_test_5','wb') as fp:
-    pickle.dump(jp_values,fp)
-
-with open('multi_test_5','rb') as fp:
-    itemlist = pickle.load(fp)
+# with open('multi_test_5','wb') as fp:
+#     pickle.dump(jp_values,fp)
+#
+# with open('multi_test_5','rb') as fp:
+#     itemlist = pickle.load(fp)
