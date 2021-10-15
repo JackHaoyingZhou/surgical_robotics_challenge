@@ -152,6 +152,8 @@ class PSM:
         self._ik_solution = enforce_limits(ik_solution)
         self.servo_jp(self._ik_solution)
 
+        return self._ik_solution
+
 
     def servo_cv(self, twist):
         pass

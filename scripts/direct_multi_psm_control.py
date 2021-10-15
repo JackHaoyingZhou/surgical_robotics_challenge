@@ -74,7 +74,7 @@ import pickle
 # with open('result_try') as f:
 #     jp_values = json.load(f)
 
-name = '/home/jackzhy/catkin_ws/src/surgical_robotics_challenge/scripts/task3_data/1/test_1'
+name = '/home/jackzhy/catkin_ws/src/surgical_robotics_challenge/scripts/task3_data/3/task3_test_3.pickle'
 # name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/joint_test_1.pickle'  ### change the file path
 # name = '/home/jackzhy/catkin_ws/src/learning_surgical_joints/test_1.pickle'  ### change the file path
 with open(name,'rb') as fp:
@@ -87,7 +87,7 @@ class ControllerInterface:
         # self.psm_arms = cycle(psm_arms)
         # self.active_psm = next(self.psm_arms)
         self.psm_arms = psm_arms
-        self.active_psm = self.psm_arms[1]
+        self.active_psm = self.psm_arms[0]
         self.gui = JointGUI('ECM JP', 4, ["ecm j0", "ecm j1", "ecm j2", "ecm j3"])
         self.jp_values = jp_values
 
@@ -97,7 +97,7 @@ class ControllerInterface:
         self._camera = camera
 
         self._T_c_b = None
-        self._update_T_c_b = True
+        self._update_T_c_b = False ##True
 
     def switch_psm(self):
         self._update_T_c_b = True
@@ -241,7 +241,7 @@ if __name__ == "__main__":
         leader = DirectDevice()
         theta_base = -0.9
         theta_tip = -theta_base
-        leader.set_base_frame(Frame(Rotation.RPY(theta_base, 0, 0), Vector(0, 0, 0)))
+        leader.set_base_frame(Frame(Rotation.RPY(theta_base, 0, 0), Vector(0, 0, 0.0)))
         leader.set_tip_frame(Frame(Rotation.RPY(theta_base + theta_tip, 0, 0), Vector(0, 0, 0)))
         controller = ControllerInterface(leader, psm_arms, cam)
         controllers.append(controller)

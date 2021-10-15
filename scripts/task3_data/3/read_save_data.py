@@ -20,8 +20,8 @@ for i in range(len(jp_values)):
     jp_list.append(joint_values)
 
 #
-with open('task3_test_1.pickle','wb') as fp:
+with open('task3_test_3.pickle','wb') as fp:
     pickle.dump([name_list, jp_list],fp)
 
-with open('task3_test_1.pickle','rb') as fp:
+with open('task3_test_3.pickle','rb') as fp:
     itemlist_1, itemlist_2 = pickle.load(fp)
