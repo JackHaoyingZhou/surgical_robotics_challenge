@@ -44,17 +44,17 @@
 #     \version   1.0
 # */
 # //==============================================================================
-from psmIK import *
+# from psmIK import *
 from ambf_client import Client
-from psm_arm import PSM
-from ecm_arm import ECM
+from surgical_robotics_challenge.psm_arm import PSM
+from surgical_robotics_challenge.ecm_arm import ECM
 import time
 import rospy
 from PyKDL import Frame, Rotation, Vector
 from argparse import ArgumentParser
 from itertools import cycle
-from jnt_control_gui import JointGUI
-from direct_device import DirectDevice
+from surgical_robotics_challenge.utils.jnt_control_gui import JointGUI
+from input_devices.direct_device import DirectDevice
 import json
 import pickle
 
@@ -69,7 +69,7 @@ import pickle
 # with open('result_try') as f:
 #     jp_values = json.load(f)
 
-name = '/home/jackzhy/catkin_ws/src/surgical_robotics_challenge/scripts/task3_data/task_data/1/task3_test.pickle'
+name = '/home/zhyjack/surgical_robotics_challenge/scripts/surgical_robotics_challenge/teleoperation/task_data/1/task3_test.pickle'
 
 with open(name,'rb') as fp:
     name_values, jp_values = pickle.load(fp)
@@ -231,6 +231,7 @@ if __name__ == "__main__":
             try:
                 for cont in controllers:
                     cont.run()
+                    print(cam.measured_jp())
             except KeyboardInterrupt:
                     print('Stop!')
             rate.sleep()

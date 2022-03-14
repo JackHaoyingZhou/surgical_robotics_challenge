@@ -14,10 +14,10 @@
 ### make sure the path is correct
 import os
 import sys
-folder_name = "/teleoperation/task_data/1"
-dynamic_path = os.path.abspath(__file__+"/../../"+folder_name)
-print(dynamic_path)
-sys.path.append(dynamic_path)
+# folder_name = "/teleoperation/task_data/1"
+# dynamic_path = os.path.abspath(__file__+"/../../"+folder_name)
+# print(dynamic_path)
+# sys.path.append(dynamic_path)
 
 from surgical_robotics_challenge.utils.joint_pos_recorder import JointPosLoader
 import pickle
