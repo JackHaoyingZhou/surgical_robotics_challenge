@@ -59,10 +59,12 @@ from input_devices.mtm_device_crtk import MTM
 from itertools import cycle
 from surgical_robotics_challenge.ecm_arm import ECM
 from surgical_robotics_challenge.utils.jnt_control_gui import JointGUI
+from surgical_robotics_challenge.utils.joint_pos_recorder import JointPosRecorder
 
 
 class ControllerInterface:
-    def __init__(self, leader, psm_arms, camera):
+    def __init__(self, leader, psm_arms, camera, save_jp=False):
+        self.save_jp = save_jp
         self.counter = 0
         self.leader = leader
         self.psm_arms = cycle(psm_arms)
@@ -116,6 +118,13 @@ class ControllerInterface:
             self.T_IK = Frame(self.cmd_rpy, self.cmd_xyz)
             self.active_psm.servo_cp(self.T_IK)
         self.active_psm.set_jaw_angle(self.leader.get_jaw_angle())
+        psm_joint_v = self.active_psm.get_ik_solution()
+        if self.save_jp:
+            record_list = []
+            record_list.append(self.active_psm.name)
+            record_list.append(psm_joint_v)
+            record_list.append(self.leader.get_jaw_angle())
+            jpRecorder.record(record_list)
 
     def update_visual_markers(self):
         # Move the Target Position Based on the GUI
@@ -149,6 +158,7 @@ if __name__ == "__main__":
     parser.add_argument('--two', action='store', dest='run_psm_two', help='Control PSM2', default=True)
     parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=True)
     parser.add_argument('--mtm', action='store', dest='mtm_name', help='Name of MTM to Bind', default='/dvrk/MTMR/')
+    parser.add_argument('--save', action='store', dest='jp_record', help='save using jp_recorder', default=True)
 
     parsed_args = parser.parse_args()
     print('Specified Arguments')
@@ -161,6 +171,12 @@ if __name__ == "__main__":
     else:
         print('ERROR! --mtm argument should be one of the following', mtm_valid_list)
         raise ValueError
+
+    if parsed_args.mtm_name == 'MTML':
+        jpRecorder = JointPosRecorder(save_path='./task_data/3/{}'.format(parsed_args.mtm_name), record_size=500)
+
+    if parsed_args.mtm_name == 'MTMR':
+        jpRecorder = JointPosRecorder(save_path='./task_data/3/{}'.format(parsed_args.mtm_name), record_size=500)
 
     if parsed_args.run_psm_one in ['True', 'true', '1']:
         parsed_args.run_psm_one = True
@@ -190,7 +206,7 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm1'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name, add_joint_errors=False)
+        psm = PSM(c, arm_name, add_joint_errors=False, save_jp=parsed_args.jp_record)
         if psm.is_present():
             T_psmtip_c = Frame(Rotation.RPY(3.14, 0.0, -1.57079), Vector(-0.2, 0.0, -1.0))
             T_psmtip_b = psm.get_T_w_b() * cam.get_T_c_w() * T_psmtip_c
@@ -203,7 +219,7 @@ if __name__ == "__main__":
         arm_name = 'psm2'
         print('LOADING CONTROLLER FOR ', arm_name)
         theta_base = -0.7
-        psm = PSM(c, arm_name, add_joint_errors=False)
+        psm = PSM(c, arm_name, add_joint_errors=False, save_jp=parsed_args.jp_record)
         if psm.is_present():
             T_psmtip_c = Frame(Rotation.RPY(3.14, 0.0, -1.57079), Vector(0.2, 0.0, -1.0))
             T_psmtip_b = psm.get_T_w_b() * cam.get_T_c_w() * T_psmtip_c
@@ -215,7 +231,7 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm3'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name, add_joint_errors=False)
+        psm = PSM(c, arm_name, add_joint_errors=False, save_jp=parsed_args.jp_record)
         if psm.is_present():
             psm_arms.append(psm)
 

@@ -111,8 +111,8 @@ class ControllerInterface:
         self.cmd_rpy = self._T_c_b.M * self.leader.measured_cp().M * Rotation.RPY(np.pi, 0, np.pi / 2)
         self.T_IK = Frame(self.cmd_rpy, self.cmd_xyz)
         self.active_psm.servo_cp(self.T_IK)
-        psm_joint_v = self.active_psm.get_ik_solution()
         self.active_psm.set_jaw_angle(self.leader.get_jaw_angle())
+        psm_joint_v = self.active_psm.get_ik_solution()
         if self.save_jp:
             record_list = []
             record_list.append(self.active_psm.name)
