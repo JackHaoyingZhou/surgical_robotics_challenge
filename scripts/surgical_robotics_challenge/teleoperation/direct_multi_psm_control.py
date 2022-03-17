@@ -70,7 +70,7 @@ import pickle
 #     jp_values = json.load(f)
 
 # name = '/home/zhyjack/surgical_robotics_challenge/scripts/surgical_robotics_challenge/teleoperation/task_data/1/task3_test.pickle'
-name = '/home/zhyjack/surgical_robotics_challenge/scripts/surgical_robotics_challenge/teleoperation/task_data/2/task1_test.pickle'
+name = '/home/zhyjack/surgical_robotics_challenge/scripts/surgical_robotics_challenge/teleoperation/task_data/geomagic_task2_2/task2_test2.pickle'
 
 with open(name,'rb') as fp:
     name_values, jp_values = pickle.load(fp)
@@ -118,7 +118,7 @@ class ControllerInterface:
             if name_values[self.counter] == 'psm2':
                 self.active_psm = self.psm_arms[1]
             self.active_psm.servo_jp(self.jp_values[self.counter][0:6])
-            print(self.jp_values[self.counter])
+            # print(self.jp_values[self.counter])
             self.active_psm.set_jaw_angle(self.jp_values[self.counter][6])
             self.counter = self.counter + 1
         else:

@@ -63,7 +63,7 @@ from surgical_robotics_challenge.utils.jnt_control_gui import JointGUI
 from surgical_robotics_challenge.utils.utilities import get_boolean_from_opt
 from surgical_robotics_challenge.utils.joint_pos_recorder import JointPosRecorder
 
-jpRecorder = JointPosRecorder(save_path = './task_data/2', record_size = 500)
+jpRecorder = JointPosRecorder(save_path = './task_data/geomagic_task2_2', record_size = 500)
 
 class ControllerInterface:
     def __init__(self, leader, psm_arms, camera, save_jp=False):
