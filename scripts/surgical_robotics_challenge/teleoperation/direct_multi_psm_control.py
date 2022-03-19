@@ -70,7 +70,7 @@ import pickle
 #     jp_values = json.load(f)
 
 # name = '/home/zhyjack/surgical_robotics_challenge/scripts/surgical_robotics_challenge/teleoperation/task_data/1/task3_test.pickle'
-name = '/home/zhyjack/surgical_robotics_challenge/scripts/surgical_robotics_challenge/teleoperation/task_data/geomagic_task2_2/task2_test2.pickle'
+name = '/home/jackzhy/surgical_robotics_challenge/scripts/surgical_robotics_challenge/teleoperation/task_data/geomagic_task2_2/task2_test2.pickle'
 
 with open(name,'rb') as fp:
     name_values, jp_values = pickle.load(fp)
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--one', action='store', dest='run_psm_one', help='Control PSM1', default=True)
     parser.add_argument('--two', action='store', dest='run_psm_two', help='Control PSM2', default=True)
-    parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=True) ## if use PSM3, change False to True
+    parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=False) ## if use PSM3, change False to True
 
     parsed_args = parser.parse_args()
     print('Specified Arguments')

@@ -103,7 +103,8 @@ class PSMCRTKWrapper:
     def __init__(self, client, name, namespace):
         self.arm_name = name
         self.namespace = namespace
-        self.arm = psm_arm.PSM(client, name, add_joint_errors=True)
+        # self.arm = psm_arm.PSM(client, name, add_joint_errors=True)
+        self.arm = psm_arm.PSM(client, name, add_joint_errors=False)
         time.sleep(0.1)
 
         self.measured_js_pub = rospy.Publisher(namespace + '/' + name + '/' + 'measured_js', JointState,
@@ -132,7 +133,7 @@ class PSMCRTKWrapper:
 
         self._measured_cp_msg = TransformStamped()
         self._measured_cp_msg.header.frame_id = 'baselink'
-        self._jaw_angle = 0.5
+        self._jaw_angle = 0.3
 
     def servo_cp_cb(self, cp):
         frame = transform_to_frame(cp.transform)
@@ -316,7 +317,7 @@ class SceneManager:
     def __init__(self, options):
         self.client = Client("ambf_surgical_sim_crtk_node")
         self.client.connect()
-        time.sleep(0.2)
+        # time.sleep(0.2)
         self._components = []
         if options.run_psm_one is True:
             print("Launching CRTK-ROS Interface for PSM1 ")
