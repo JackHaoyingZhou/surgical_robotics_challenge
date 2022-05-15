@@ -1,0 +1,73 @@
+import numpy as np
+from scipy.spatial.transform import Rotation as R
+import pickle
+from surgical_robotics_challenge.Task2_project.pydmps.pydmps.cs import CanonicalSystem
+from surgical_robotics_challenge.kinematics.psmFK import *
+from surgical_robotics_challenge.kinematics.psmIK import *
+from surgical_robotics_challenge.utils.utilities import convert_mat_to_frame
+
+from PyKDL import Vector, Rotation, Frame, dot
+
+file = 'data0.pickle'
+
+with open(file,'rb') as fp:
+    name_list, jp_list = pickle.load(fp)
+
+jp_value = []
+
+jp_value.append(jp_list[800])
+
+jp_new = []
+
+jp_new.append(jp_list[800][0:6])
+jp_new[0].append(0.3) # 0.0
+
+for i in range(1000):
+    jp_value.append(jp_list[800])
+    jp_new.append(jp_list[800][0:6])
+    if i < 900:
+        jp_new[i+1].append(0.3) # 0.0
+    else:
+        jp_new[i + 1].append(0.0)
+
+jp_value.append(jp_list[4800])
+
+jp_new.append(jp_list[4800][0:6])
+jp_new[1001].append(0.0)
+
+for j in range(200):
+    jp_value.append(jp_list[4800])
+    jp_new.append(jp_list[4800][0:6])
+    jp_new[j+1001].append(0.0)
+
+for k in range(700):
+    jp_value.append(jp_list[4800+k])
+    jp_new.append(jp_list[4800+k][0:6])
+    jp_new[k+1201].append(0.0)
+
+name_new = name_list[0:1902]
+
+with open('data0_decouple.pickle','wb') as fp:
+    pickle.dump([name_new, jp_new],fp)
+
+# jp_value = jp_list[4800][0:6]
+#
+# jp_value.append(0.0)
+#
+# # jp_value.append(0.0)
+#
+# T_f = compute_FK(jp_value, 7)
+# #
+# T_f_frame = convert_mat_to_frame(T_f)
+# # ik_sol = compute_IK(T_f_frame)
+# # ik_sol = enforce_limits(ik_sol)
+# #
+# # ik_sol.append(jp_list[1][-1])
+# #
+# Pos = T_f[0:3, 3]
+# Rot = T_f[0:3, 0:3]
+#
+# r = R.from_matrix(Rot)
+#
+# a = r.as_quat()   # [x,y,z,w]
+

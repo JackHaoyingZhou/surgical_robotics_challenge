@@ -1,0 +1,6 @@
+[submodule "scripts/surgical_robotics_challenge/Task2_project/quaternion-dmp"]
+	path = scripts/surgical_robotics_challenge/Task2_project/quaternion-dmp
+	url = https://github.com/JackHaoyingZhou/quaternion-dmp.git
+[submodule "scripts/surgical_robotics_challenge/Task2_project/pydmps"]
+	path = scripts/surgical_robotics_challenge/Task2_project/pydmps
+	url = https://github.com/JackHaoyingZhou/pydmps.git
