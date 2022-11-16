@@ -44,12 +44,7 @@
 # //==============================================================================
 import os
 import sys
-dynamic_path = os.path.abspath(__file__+"/../../../")
-# print dynamic_path
-sys.path.append(dynamic_path)
-
-import sys
-from ambf_client import Client
+from surgical_robotics_challenge.simulation_manager import SimulationManager
 from surgical_robotics_challenge.psm_arm import PSM
 import time
 import rospy
@@ -59,7 +54,7 @@ from input_devices.mtm_device_crtk import MTM
 from itertools import cycle
 from surgical_robotics_challenge.ecm_arm import ECM
 from surgical_robotics_challenge.utils.jnt_control_gui import JointGUI
-from surgical_robotics_challenge.utils.joint_pos_recorder import JointPosRecorder
+from surgical_robotics_challenge.utils import coordinate_frames
 
 
 class ControllerInterface:
@@ -107,7 +102,7 @@ class ControllerInterface:
         else:
             if self.leader.is_active():
                 self.leader.servo_cp(self.leader.pre_coag_pose_msg)
-        twist = self.leader.measured_cv() * 0.035
+        twist = self.leader.measured_cv() * 0.0035
         self.cmd_xyz = self.active_psm.T_t_b_home.p
         if not self.leader.clutch_button_pressed:
             delta_t = self._T_c_b.M * twist.vel
@@ -130,8 +125,7 @@ class ControllerInterface:
         # Move the Target Position Based on the GUI
         if self.active_psm.target_IK is not None:
             T_t_w = self.active_psm.get_T_b_w() * self.T_IK
-            self.active_psm.target_IK.set_pos(T_t_w.p[0], T_t_w.p[1], T_t_w.p[2])
-            self.active_psm.target_IK.set_rpy(T_t_w.M.GetRPY()[0], T_t_w.M.GetRPY()[1], T_t_w.M.GetRPY()[2])
+            self.active_psm.target_IK.set_pose(T_t_w)
         # if self.arm.target_FK is not None:
         #     ik_solution = self.arm.get_ik_solution()
         #     ik_solution = np.append(ik_solution, 0)
@@ -153,7 +147,7 @@ class ControllerInterface:
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('-c', action='store', dest='client_name', help='Client Name', default='ambf_client')
+    parser.add_argument('-c', action='store', dest='client_name', help='Client Name', default='mtm_sim_teleop')
     parser.add_argument('--one', action='store', dest='run_psm_one', help='Control PSM1', default=True)
     parser.add_argument('--two', action='store', dest='run_psm_two', help='Control PSM2', default=True)
     parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=True)
@@ -192,10 +186,9 @@ if __name__ == "__main__":
     elif parsed_args.run_psm_three in ['False', 'false', '0']:
         parsed_args.run_psm_three = False
 
-    c = Client(parsed_args.client_name)
-    c.connect()
+    simulation_manager = SimulationManager(parsed_args.client_name)
 
-    cam = ECM(c, 'CameraFrame')
+    cam = ECM(simulation_manager, 'CameraFrame')
     time.sleep(0.5)
 
     controllers = []
@@ -206,9 +199,9 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm1'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name, add_joint_errors=False, save_jp=parsed_args.jp_record)
+        psm = PSM(simulation_manager, arm_name, add_joint_errors=False)
         if psm.is_present():
-            T_psmtip_c = Frame(Rotation.RPY(3.14, 0.0, -1.57079), Vector(-0.2, 0.0, -1.0))
+            T_psmtip_c = coordinate_frames.PSM1.T_tip_cam
             T_psmtip_b = psm.get_T_w_b() * cam.get_T_c_w() * T_psmtip_c
             psm.set_home_pose(T_psmtip_b)
             psm_arms.append(psm)
@@ -219,9 +212,9 @@ if __name__ == "__main__":
         arm_name = 'psm2'
         print('LOADING CONTROLLER FOR ', arm_name)
         theta_base = -0.7
-        psm = PSM(c, arm_name, add_joint_errors=False, save_jp=parsed_args.jp_record)
+        psm = PSM(simulation_manager, arm_name, add_joint_errors=False)
         if psm.is_present():
-            T_psmtip_c = Frame(Rotation.RPY(3.14, 0.0, -1.57079), Vector(0.2, 0.0, -1.0))
+            T_psmtip_c = coordinate_frames.PSM2.T_tip_cam
             T_psmtip_b = psm.get_T_w_b() * cam.get_T_c_w() * T_psmtip_c
             psm.set_home_pose(T_psmtip_b)
             psm_arms.append(psm)
@@ -231,8 +224,11 @@ if __name__ == "__main__":
         # init_xyz = [0.1, -0.85, -0.15]
         arm_name = 'psm3'
         print('LOADING CONTROLLER FOR ', arm_name)
-        psm = PSM(c, arm_name, add_joint_errors=False, save_jp=parsed_args.jp_record)
+        psm = PSM(simulation_manager, arm_name, add_joint_errors=False)
         if psm.is_present():
+            T_psmtip_c = coordinate_frames.PSM3.T_tip_cam
+            T_psmtip_b = psm.get_T_w_b() * cam.get_T_c_w() * T_psmtip_c
+            psm.set_home_pose(T_psmtip_b)
             psm_arms.append(psm)
 
     if len(psm_arms) == 0:
