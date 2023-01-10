@@ -24,8 +24,6 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import rospy
 
-
-
 np.set_printoptions(precision=3, suppress=True)
 
 
@@ -66,8 +64,8 @@ if __name__ == "__main__":
 
     # Calculate opencv camera intrinsics
     fvg = 1.2
-    width = 1920 #640
-    height = 1080  #480
+    width = 640
+    height = 480
     f = height / (2 * np.tan(fvg / 2))
 
     intrinsic_params = np.zeros((3, 3))

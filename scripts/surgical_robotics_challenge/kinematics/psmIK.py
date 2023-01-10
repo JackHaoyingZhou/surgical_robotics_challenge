@@ -42,13 +42,6 @@
 #     \version   1.0
 # */
 # //==============================================================================
-### make sure the path is correct
-import os
-import sys
-dynamic_path = os.path.abspath(__file__+"/../../../")
-# print dynamic_path
-sys.path.append(dynamic_path)
-
 
 from PyKDL import Vector, Rotation, Frame, dot
 import numpy as np

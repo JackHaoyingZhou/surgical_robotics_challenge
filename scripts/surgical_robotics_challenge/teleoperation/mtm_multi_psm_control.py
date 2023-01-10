@@ -42,7 +42,6 @@
 #     \version   1.0
 # */
 # //==============================================================================
-import os
 import sys
 from surgical_robotics_challenge.simulation_manager import SimulationManager
 from surgical_robotics_challenge.psm_arm import PSM
@@ -58,8 +57,7 @@ from surgical_robotics_challenge.utils import coordinate_frames
 
 
 class ControllerInterface:
-    def __init__(self, leader, psm_arms, camera, save_jp=False):
-        self.save_jp = save_jp
+    def __init__(self, leader, psm_arms, camera):
         self.counter = 0
         self.leader = leader
         self.psm_arms = cycle(psm_arms)
@@ -113,13 +111,6 @@ class ControllerInterface:
             self.T_IK = Frame(self.cmd_rpy, self.cmd_xyz)
             self.active_psm.servo_cp(self.T_IK)
         self.active_psm.set_jaw_angle(self.leader.get_jaw_angle())
-        psm_joint_v = self.active_psm.get_ik_solution()
-        if self.save_jp:
-            record_list = []
-            record_list.append(self.active_psm.name)
-            record_list.append(psm_joint_v)
-            record_list.append(self.leader.get_jaw_angle())
-            jpRecorder.record(record_list)
 
     def update_visual_markers(self):
         # Move the Target Position Based on the GUI
@@ -152,7 +143,6 @@ if __name__ == "__main__":
     parser.add_argument('--two', action='store', dest='run_psm_two', help='Control PSM2', default=True)
     parser.add_argument('--three', action='store', dest='run_psm_three', help='Control PSM3', default=True)
     parser.add_argument('--mtm', action='store', dest='mtm_name', help='Name of MTM to Bind', default='/dvrk/MTMR/')
-    parser.add_argument('--save', action='store', dest='jp_record', help='save using jp_recorder', default=True)
 
     parsed_args = parser.parse_args()
     print('Specified Arguments')
@@ -165,12 +155,6 @@ if __name__ == "__main__":
     else:
         print('ERROR! --mtm argument should be one of the following', mtm_valid_list)
         raise ValueError
-
-    if parsed_args.mtm_name == 'MTML':
-        jpRecorder = JointPosRecorder(save_path='./task_data/3/{}'.format(parsed_args.mtm_name), record_size=500)
-
-    if parsed_args.mtm_name == 'MTMR':
-        jpRecorder = JointPosRecorder(save_path='./task_data/3/{}'.format(parsed_args.mtm_name), record_size=500)
 
     if parsed_args.run_psm_one in ['True', 'true', '1']:
         parsed_args.run_psm_one = True

@@ -104,8 +104,7 @@ class PSMCRTKWrapper:
     def __init__(self, client, name, namespace):
         self.arm_name = name
         self.namespace = namespace
-        # self.arm = psm_arm.PSM(client, name, add_joint_errors=True)
-        self.arm = psm_arm.PSM(client, name, add_joint_errors=False)
+        self.arm = psm_arm.PSM(client, name, add_joint_errors=True)
         time.sleep(0.1)
 
         self.measured_js_pub = rospy.Publisher(namespace + '/' + name + '/' + 'measured_js', JointState,

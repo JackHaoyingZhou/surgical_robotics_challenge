@@ -43,12 +43,6 @@
 # */
 # //==============================================================================
 import numpy as np
-import os
-import sys
-dynamic_path = os.path.abspath(__file__+"/../../")
-# print dynamic_path
-sys.path.append(dynamic_path)
-
 from surgical_robotics_challenge.kinematics.psmIK import *
 from surgical_robotics_challenge.utils.joint_errors_model import JointErrorsModel
 from surgical_robotics_challenge.utils import coordinate_frames
@@ -190,15 +184,6 @@ class PSM:
         self.base.set_joint_vel(3, jv[3])
         self.base.set_joint_vel(4, jv[4])
         self.base.set_joint_vel(5, jv[5])
-
-    def servo_jf(self, jf):
-        # print("Setting Joint Effort", jf)
-        self.base.set_joint_effort(0, jf[0])
-        self.base.set_joint_effort(1, jf[1])
-        self.base.set_joint_effort(2, jf[2])
-        self.base.set_joint_effort(3, jf[3])
-        self.base.set_joint_effort(4, jf[4])
-        self.base.set_joint_effort(5, jf[5])
 
     def set_jaw_angle(self, jaw_angle):
         self.base.set_joint_pos(6, jaw_angle)
