@@ -165,6 +165,7 @@ class PSM:
 
         ik_solution = compute_IK(T_t_b)
         self._ik_solution = enforce_limits(ik_solution, self.get_lower_limits(), self.get_upper_limits())
+        print('servo_jp: ', self._ik_solution)
         self.servo_jp(self._ik_solution)
 
     def servo_cv(self, twist):
