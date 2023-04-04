@@ -73,6 +73,7 @@ if __name__ == '__main__':
     w.reset_bodies()
     time.sleep(0.2)
     cam = ECM(simulation_manager, 'CameraFrame')
+    cam.servo_jp([0.0, 0.05, -0.01, 0.0])
     time.sleep(0.5)
     psm1 = PSM(simulation_manager, 'psm1', add_joint_errors=False)
     time.sleep(2.0)

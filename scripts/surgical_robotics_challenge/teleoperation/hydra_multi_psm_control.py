@@ -67,7 +67,7 @@ from surgical_robotics_challenge.utils import coordinate_frames
 
 
 class ControllerInterface:
-    def __init__(self, leader, psm_arms, camera):
+    def __init__(self, leader, psm_arms, ecm):
         self.counter = 0
         self.leader = leader
         self.psm_arms = cycle(psm_arms)
@@ -80,7 +80,7 @@ class ControllerInterface:
         self.cmd_xyz = self.active_psm.T_t_b_home.p
         self.cmd_rpy = None
         self.T_IK = None
-        self._camera = camera
+        self._ecm = ecm
 
         self._T_c_b = None
         self._update_T_c_b = True
@@ -102,13 +102,14 @@ class ControllerInterface:
         print('Switching Control of Next PSM Arm: ', self.active_psm.name)
 
     def update_T_c_b(self):
-        if self._update_T_c_b or self._camera.has_pose_changed():
-            self._T_c_b = self.active_psm.get_T_w_b() * self._camera.get_T_c_w()
+        if self._update_T_c_b or self._ecm.has_pose_changed():
+            self._T_c_b = self.active_psm.get_T_w_b() * self._ecm.get_T_c_w()
             self._update_T_c_b = False
 
     def update_camera_pose(self):
         self.gui.App.update()
-        self._camera.servo_jp(self.gui.jnt_cmds)
+        new_jp = [x+y for x, y in zip(self.gui.jnt_cmds, [0.0, 0.05, -0.01, 0.0])]
+        self._ecm.servo_jp(new_jp)
 
     def update_arm_pose(self):
         self.update_T_c_b()

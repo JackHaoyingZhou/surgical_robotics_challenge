@@ -90,7 +90,12 @@ class ControllerInterface:
 
     def update_camera_pose(self):
         self.gui.App.update()
-        self._ecm.servo_jp(self.gui.jnt_cmds)
+        new_jp = [x+y for x, y in zip(self.gui.jnt_cmds, [0.0, 0.05, -0.01, 0.0])]
+        self._ecm.servo_jp(new_jp)
+
+    # def update_camera_pose(self):
+    #     self.gui.App.update()
+    #     self._ecm.servo_jp(self.gui.jnt_cmds)
 
     def update_arm_pose(self):
         self.update_T_b_c()
