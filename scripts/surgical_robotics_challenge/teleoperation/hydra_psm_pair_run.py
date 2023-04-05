@@ -90,8 +90,6 @@ class ControllerInterface:
         self._T2_c_b = None
         self._update_T_c_b = True
         self._pub_ecm = rospy.Publisher('/ecm/setpoint_js', Float64MultiArray, queue_size=1)
-        self.run_process_1 = 0
-        self.run_process_2 = 0
 
     def update_T_c_b(self):
         if self._update_T_c_b or self._ecm.has_pose_changed():
@@ -106,7 +104,6 @@ class ControllerInterface:
         msg = Float64MultiArray()
         msg.data = new_jp
         self._pub_ecm.publish(msg)
-
 
     def teleop_pair_1(self):
         twist = self.leader_1.measured_cv()
