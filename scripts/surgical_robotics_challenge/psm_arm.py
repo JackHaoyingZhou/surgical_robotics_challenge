@@ -47,6 +47,9 @@ from surgical_robotics_challenge.kinematics.psmIK import *
 from surgical_robotics_challenge.utils.joint_errors_model import JointErrorsModel
 from surgical_robotics_challenge.utils import coordinate_frames
 import time
+from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Float64
+import rospy
 
 
 class PSMJointMapping:
@@ -85,7 +88,10 @@ class PSM:
         time.sleep(0.5)
         self.grasped = [False, False, False]
         self.graspable_objs_prefix = ["Needle", "Thread", "Puzzle"]
-
+        self._pub_topic_arm = '/' + name + '/setpoint_js'
+        self._pub_topic_jaw = '/' + name + '/jaw/setpoint_js'
+        self._pub_arm = rospy.Publisher(self._pub_topic_arm, Float64MultiArray, queue_size=1)
+        self._pub_jaw = rospy.Publisher(self._pub_topic_jaw, Float64, queue_size=1)
         self.T_t_b_home = coordinate_frames.PSM.T_t_b_home
         self._kd = kinematics_data
 
@@ -165,7 +171,6 @@ class PSM:
 
         ik_solution = compute_IK(T_t_b)
         self._ik_solution = enforce_limits(ik_solution, self.get_lower_limits(), self.get_upper_limits())
-        print('servo_jp: ', self._ik_solution)
         self.servo_jp(self._ik_solution)
 
     def servo_cv(self, twist):
@@ -183,6 +188,9 @@ class PSM:
         self.base.set_joint_pos(3, jp[3])
         self.base.set_joint_pos(4, jp[4])
         self.base.set_joint_pos(5, jp[5])
+        msg = Float64MultiArray()
+        msg.data = jp
+        self._pub_arm.publish(msg)
 
     def servo_jv(self, jv):
         print("Setting Joint Vel", jv)
@@ -197,6 +205,7 @@ class PSM:
         self.base.set_joint_pos(6, jaw_angle)
         self.base.set_joint_pos(7, jaw_angle)
         self.run_grasp_logic(jaw_angle)
+        self._pub_jaw.publish(jaw_angle)
 
     def measured_cp(self):
         jp = self.measured_jp()

@@ -54,7 +54,7 @@ from itertools import cycle
 from surgical_robotics_challenge.ecm_arm import ECM
 from surgical_robotics_challenge.utils.jnt_control_gui import JointGUI
 from surgical_robotics_challenge.utils import coordinate_frames
-
+from std_msgs.msg import Float64MultiArray
 
 class ControllerInterface:
     def __init__(self, leader, psm_arms, ecm):
@@ -75,7 +75,7 @@ class ControllerInterface:
 
         self._T_c_b = None
         self._update_T_c_b = True
-
+        self._pub_ecm = rospy.Publisher('/ecm/setpoint_js', Float64MultiArray, queue_size=1)
         self.leader.enable_gravity_comp()
 
     def switch_psm(self):
@@ -92,6 +92,9 @@ class ControllerInterface:
         self.gui.App.update()
         new_jp = [x+y for x, y in zip(self.gui.jnt_cmds, [0.0, 0.05, -0.01, 0.0])]
         self._ecm.servo_jp(new_jp)
+        msg = Float64MultiArray()
+        msg.data = new_jp
+        self._pub_ecm.publish(msg)
 
     # def update_camera_pose(self):
     #     self.gui.App.update()

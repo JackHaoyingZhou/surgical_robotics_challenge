@@ -39,6 +39,8 @@
 
 #     \author    <amunawar@jhu.edu>
 #     \author    Adnan Munawar
+#     \author    <hzhou6@wpi.edu>
+#     \author    Haoying(Jack) Zhou
 #     \version   1.0
 # */
 # //==============================================================================
@@ -48,7 +50,7 @@ import sys
 import numpy as np
 
 dynamic_path = os.path.abspath(__file__+"/../../../")
-print(dynamic_path)
+# print(dynamic_path)
 sys.path.append(dynamic_path)
 
 from surgical_robotics_challenge.simulation_manager import SimulationManager
@@ -64,6 +66,7 @@ from itertools import cycle
 from surgical_robotics_challenge.utils.jnt_control_gui import JointGUI
 from surgical_robotics_challenge.utils.utilities import get_boolean_from_opt
 from surgical_robotics_challenge.utils import coordinate_frames
+from std_msgs.msg import Float64MultiArray
 
 
 class ControllerInterface:
@@ -84,16 +87,7 @@ class ControllerInterface:
 
         self._T_c_b = None
         self._update_T_c_b = True
-
-
-        self.T_data = self.leader.measured_cp()
-        # self.T_start = self.active_psm.T_t_b_home
-        # self.T_origin = self.T_start
-        #
-        # self.rot_origin = np.array(list(self.T_origin.M.GetEulerZYX()))
-        # self.rot_start = np.array(list(self.T_start.M.GetEulerZYX()))
-        #
-        # self.step_p = (self.T_start.p - self.T_origin.p)
+        self._pub_ecm = rospy.Publisher('/ecm/setpoint_js', Float64MultiArray, queue_size=1)
 
 
     def switch_psm(self):
@@ -110,6 +104,9 @@ class ControllerInterface:
         self.gui.App.update()
         new_jp = [x+y for x, y in zip(self.gui.jnt_cmds, [0.0, 0.05, -0.01, 0.0])]
         self._ecm.servo_jp(new_jp)
+        msg = Float64MultiArray()
+        msg.data = new_jp
+        self._pub_ecm.publish(msg)
 
     def update_arm_pose(self):
         self.update_T_c_b()
@@ -122,7 +119,6 @@ class ControllerInterface:
         self.cmd_rpy = self._T_c_b.M * self.leader.measured_cp().M * Rotation.RPY(3.14, 0, 3.14 / 2.0)
         self.T_IK = Frame(self.cmd_rpy, self.cmd_xyz)
         self.active_psm.servo_cp(self.T_IK)
-        print('measured_jp: ', self.active_psm.measured_jp())
         self.active_psm.set_jaw_angle(self.leader.get_jaw_angle())
         self.active_psm.run_grasp_logic(self.leader.get_jaw_angle())
 
@@ -179,6 +175,7 @@ if __name__ == "__main__":
 
     cam = ECM(simulation_manager, 'CameraFrame')
     time.sleep(0.5)
+    cam.servo_jp([0., 0., 0., 0.])
 
     controllers = []
     psm_arms = []
