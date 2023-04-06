@@ -193,14 +193,6 @@ if __name__ == "__main__":
     print('Specified Arguments')
     print(parsed_args)
 
-    mtm_valid_list = ['/MTMR/, /MTML/', '/dvrk/MTMR/', '/dvrk/MTML/', 'MTMR', 'MTML']
-    if parsed_args.mtm_name in mtm_valid_list:
-        if parsed_args.mtm_name in ['MTMR', 'MTML']:
-            parsed_args.mtm_name = '/' + parsed_args.mtm_name + '/'
-    else:
-        print('ERROR! --mtm argument should be one of the following', mtm_valid_list)
-        raise ValueError
-
     if parsed_args.run_psm_one in ['True', 'true', '1']:
         parsed_args.run_psm_one = True
     elif parsed_args.run_psm_one in ['False', 'false', '0']:
