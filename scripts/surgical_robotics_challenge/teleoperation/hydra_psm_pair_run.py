@@ -101,9 +101,10 @@ class ControllerInterface:
         self.gui.App.update()
         new_jp = [x+y for x, y in zip(self.gui.jnt_cmds, [0.0, 0.05, -0.01, 0.0])]
         self._ecm.servo_jp(new_jp)
-        msg = Float64MultiArray()
-        msg.data = new_jp
-        self._pub_ecm.publish(msg)
+        if not (self.leader_1.clutch_button_pressed or self.leader_2.clutch_button_pressed):
+            msg = Float64MultiArray()
+            msg.data = new_jp
+            self._pub_ecm.publish(msg)
 
     def teleop_pair_1(self):
         twist = self.leader_1.measured_cv()

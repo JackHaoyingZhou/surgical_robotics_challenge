@@ -33,9 +33,10 @@ def read_bagpy(rosbag_name):
 
 
 if __name__ == '__main__':
-    data_folder = os.path.join(dynamic_path, 'data_test')
-    rosbag_name_list = glob(os.path.join(data_folder, '*.bag'))
-    rosbag_name = rosbag_name_list[0]
+    # data_folder = os.path.join(dynamic_path, 'data_test')
+    # rosbag_name_list = glob(os.path.join(data_folder, '*.bag'))
+    # rosbag_name = rosbag_name_list[0]
+    rosbag_name = '/home/zhyjack/dVRK_LfD_simulation/data/test_1.bag'
     # output_folder = os.path.join(dynamic_path, 'test_image')
     #
     # if not os.path.exists(output_folder):
