@@ -97,11 +97,11 @@ class ControllerInterface:
         self.gui.App.update()
         new_jp = [x+y for x, y in zip(self.gui.jnt_cmds, [0.0, 0.05, -0.01, 0.0])]
         self._ecm.servo_jp(new_jp)
-        if (not (self.leader_1.clutch_button_pressed or self.leader_2.clutch_button_pressed)) and \
-                (self.leader_1.coag_button_pressed and self.leader_2.coag_button_pressed):
-            msg = Float64MultiArray()
-            msg.data = new_jp
-            self._pub_ecm.publish(msg)
+        # if (not (self.leader_1.clutch_button_pressed or self.leader_2.clutch_button_pressed)) and \
+        #         (self.leader_1.coag_button_pressed and self.leader_2.coag_button_pressed):
+        msg = Float64MultiArray()
+        msg.data = new_jp
+        self._pub_ecm.publish(msg)
 
     # def update_camera_pose(self):
     #     self.gui.App.update()

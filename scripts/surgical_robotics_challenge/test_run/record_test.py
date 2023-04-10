@@ -18,7 +18,7 @@ if __name__ == '__main__':
     # data_folder = os.path.join(dynamic_path, 'data_test')
     # rosbag_name_list = glob(os.path.join(data_folder, '*.bag'))
     # rosbag_name = rosbag_name_list[0]
-    rosbag_name = '/home/zhyjack/dVRK_LfD_simulation/data/test_2.bag'
+    rosbag_name = '/home/zhyjack/dVRK_LfD_simulation/data/test_4.bag'
     # output_folder = os.path.join(dynamic_path, 'test_image')
     #
     # if not os.path.exists(output_folder):
@@ -126,15 +126,9 @@ if __name__ == '__main__':
     for i in range(len(psm1_pos)):
         cam.servo_jp(ecm_pos[i])
         psm1.servo_jp(psm1_pos[i])
-        if (count >= 900) & (count <= 1200):
-            psm1.set_jaw_angle(psm1_jaw[i])
-        else:
-            psm1.set_jaw_angle(psm1_jaw[i])
+        psm1.set_jaw_angle(psm1_jaw[i])
         psm2.servo_jp(psm2_pos[i])
-        if (count >= 900) & (count <= 1200):
-            psm2.set_jaw_angle(psm2_jaw[i])
-        else:
-            psm2.set_jaw_angle(psm2_jaw[i])
+        psm2.set_jaw_angle(psm2_jaw[i])
         time.sleep(0.01)
         count += 1
         print(count)
