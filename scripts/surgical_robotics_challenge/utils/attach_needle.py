@@ -46,7 +46,7 @@
 from surgical_robotics_challenge.simulation_manager import SimulationManager
 import PyKDL
 from PyKDL import Vector, Rotation
-from surgical_robotics_challenge.utils.utilities import cartesian_interpolate_step
+from surgical_robotics_challenge.utils.utilities import cartesian_interpolate_step_num
 import numpy as np
 import time
 import rospy
@@ -59,11 +59,11 @@ else:
 
 class NeedleOffsets:
     TnINt1 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., np.pi),
-                   Vector(-0.10727960616350174, -0.07585766911506653, -0.013998392969369888))
+                   Vector(-0.010727960616350174, -0.007585766911506653, -0.0013998392969369888))
     TnINt2 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., 0.),
-                   Vector(0.09973019361495972, -0.05215135216712952, 0.03237169608473778))
+                   Vector(0.009973019361495972, -0.005215135216712952, 0.003237169608473778))
     TnINt3 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., 0.),
-                   Vector(0.10727960616350174, -0.07585766911506653, -0.013998392969369888))
+                   Vector(0.010727960616350174, -0.007585766911506653, -0.0013998392969369888))
 
 
 def attach_needle(needle, link, T_offset):
@@ -72,21 +72,29 @@ def attach_needle(needle, link, T_offset):
         print('Not a valid link, returning')
         return
     T_nINw = needle.get_pose()
+    print('run attach')
     while not reached and not rospy.is_shutdown():
         T_tINw = link.get_pose()
         T_nINw_cmd = T_tINw * T_offset
 
-        T_delta, error_max = cartesian_interpolate_step(T_nINw, T_nINw_cmd, 0.01)
+        # print('needle: ', T_nINw)
+        #
+        # print('link: ', T_nINw_cmd)
+
+        T_delta, error_max = cartesian_interpolate_step_num(T_nINw, T_nINw_cmd, 0.01, 0.0005)
         r_delta = T_delta.M.GetRPY()
-        # print(error_max)
+        print(T_delta.p)
+        # print(T_delta.M)
         if error_max < 0.01:
             reached = True
+            print('done!')
             break
 
         T_cmd = Frame()
         T_cmd.p = T_nINw.p + T_delta.p
         T_cmd.M = T_nINw.M * Rotation.RPY(r_delta[0], r_delta[1], r_delta[2])
         T_nINw = T_cmd
+        # print(T_cmd)
         needle.set_pose(T_cmd)
         time.sleep(0.001)
         # T_nINw = get_obj_trans(needle)
@@ -100,8 +108,8 @@ def attach_needle(needle, link, T_offset):
 
     # Don't forget to release the pose command from the needle. We can
     # do so by calling:
-    needle.set_force(0, 0, 0)
-    needle.set_torque(0, 0, 0)
+    needle.set_force([0, 0, 0])
+    needle.set_torque([0, 0, 0])
 
 
 def psm1_btn_cb():
@@ -112,8 +120,8 @@ def psm2_btn_cb():
     attach_needle(needle, link2, NeedleOffsets.TnINt2)
 
 
-def psm3_btn_cb():
-    attach_needle(needle, link3, NeedleOffsets.TnINt3)
+# def psm3_btn_cb():
+#     attach_needle(needle, link3, NeedleOffsets.TnINt3)
 
 
 simulation_manager = SimulationManager('attach_needle')
@@ -121,7 +129,7 @@ simulation_manager = SimulationManager('attach_needle')
 needle = simulation_manager.get_obj_handle('Needle')
 link1 = simulation_manager.get_obj_handle('psm1' + '/toolyawlink')
 link2 = simulation_manager.get_obj_handle('psm2' + '/toolyawlink')
-link3 = simulation_manager.get_obj_handle('psm3' + '/toolyawlink')
+# link3 = simulation_manager.get_obj_handle('psm3' + '/toolyawlink')
 time.sleep(0.5)
 
 tk = Tk()
@@ -131,11 +139,11 @@ link1_button = Button(tk, text="PSM 1", command=psm1_btn_cb,
                       height=3, width=50, bg="red")
 link2_button = Button(tk, text="PSM 2", command=psm2_btn_cb,
                       height=3, width=50, bg="green")
-link3_button = Button(tk, text="PSM 3", command=psm3_btn_cb,
-                      height=3, width=50, bg="blue")
+# link3_button = Button(tk, text="PSM 3", command=psm3_btn_cb,
+#                       height=3, width=50, bg="blue")
 
 link1_button.pack()
 link2_button.pack()
-link3_button.pack()
+# link3_button.pack()
 
 tk.mainloop()

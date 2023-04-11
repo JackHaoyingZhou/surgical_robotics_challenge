@@ -37,5 +37,5 @@ time.sleep(0.5)
 needle.release()
 time.sleep(2.0)
 # Open the jaws to let go of the needle from grasp
-psm2.set_jaw_angle(0.8)
-time.sleep(2.0)
+# psm2.set_jaw_angle(0.8)
+# time.sleep(2.0)
