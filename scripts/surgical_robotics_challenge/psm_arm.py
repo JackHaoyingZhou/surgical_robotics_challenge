@@ -188,7 +188,7 @@ class PSM:
         self.base.set_joint_pos(3, jp[3])
         self.base.set_joint_pos(4, jp[4])
         self.base.set_joint_pos(5, jp[5])
-        print('servo jp: ', jp)
+        # print('servo jp: ', jp)
         msg = Float64MultiArray()
         msg.data = jp
         self._pub_arm.publish(msg)
