@@ -10,12 +10,12 @@ w = simulation_manager.get_world_handle()
 time.sleep(0.2)
 w.reset_bodies()
 time.sleep(0.2)
-psm2 = PSM(simulation_manager, 'psm2')
+psm2 = PSM(simulation_manager, 'psm2', add_joint_errors=False)
 time.sleep(0.5)
 # First we shall move the PSM to its initial pose using joint commands OR pose command
 psm2.servo_jp([-0.4, -0.22, 0.139, -1.64, -0.37, -0.11])
 # Open the Jaws
-psm2.set_jaw_angle(0.8)
+psm2.set_jaw_angle(0.3)
 # Sleep to achieve the target pose and jaw angle
 time.sleep(1.0)
 # Instantiate the needle initialization class

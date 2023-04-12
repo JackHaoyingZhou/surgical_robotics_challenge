@@ -58,12 +58,14 @@ else:
 
 
 class NeedleOffsets:
-    TnINt1 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., np.pi),
-                   Vector(-0.010727960616350174, -0.007585766911506653, -0.0013998392969369888))
-    TnINt2 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., 0.),
-                   Vector(0.009973019361495972, -0.005215135216712952, 0.003237169608473778))
-    TnINt3 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., 0.),
-                   Vector(0.010727960616350174, -0.007585766911506653, -0.0013998392969369888))
+    # TnINt1 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., np.pi),
+    #                Vector(-0.010727960616350174, -0.007585766911506653, -0.0013998392969369888))
+    # TnINt2 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., 0.),
+    #                Vector(0.009973019361495972, -0.005215135216712952, 0.003237169608473778))
+    TnINt1 = PyKDL.Frame(Rotation.RPY(-np.pi / 2., 0., np.pi),
+                         Vector(0., 0., 0.))
+    TnINt2 = PyKDL.Frame(Rotation.RPY(-np.pi / 2., 0., 0.),
+                         Vector(0.009973019361495972, -0.005215135216712952, 0.003237169608473778))
 
 
 def attach_needle(needle, link, T_offset):
