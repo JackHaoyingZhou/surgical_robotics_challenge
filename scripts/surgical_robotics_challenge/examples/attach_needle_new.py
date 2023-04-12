@@ -22,7 +22,7 @@ class NeedleInitialization:
         return self.T_needle_psmtip
 
     def move_to_psm1(self, psm_tip):
-        T_needle_psmtip_offset = self.T_needle_psmtip_far * Frame(Rotation.RPY(-np.pi/2 , 0., np.pi), Vector(-0.10727960616350174, -0.07585766911506653, -0.013998392969369888))
+        T_needle_psmtip_offset = self.T_needle_psmtip_far * Frame(Rotation.RPY(-np.pi/2 , 0., np.pi), Vector(0., 0., 0.))
         print('Moving Needle to PSM 1 Tip')
         self._release = False
         if psm_tip is None:

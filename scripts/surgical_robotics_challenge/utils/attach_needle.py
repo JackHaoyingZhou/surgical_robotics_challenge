@@ -62,10 +62,10 @@ class NeedleOffsets:
     #                Vector(-0.010727960616350174, -0.007585766911506653, -0.0013998392969369888))
     # TnINt2 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., 0.),
     #                Vector(0.009973019361495972, -0.005215135216712952, 0.003237169608473778))
-    TnINt1 = PyKDL.Frame(Rotation.RPY(-np.pi / 2., 0., np.pi),
-                         Vector(0., 0., 0.))
-    TnINt2 = PyKDL.Frame(Rotation.RPY(-np.pi / 2., 0., 0.),
-                         Vector(0.009973019361495972, -0.005215135216712952, 0.003237169608473778))
+    TnINt1 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., np.pi),
+                   Vector(-0.009973019361495972, -0.005215135216712952, 0.003237169608473778))
+    TnINt2 = PyKDL.Frame(Rotation.RPY(-np.pi/2., 0., 0.),
+                   Vector(0.009973019361495972, -0.005215135216712952, 0.003237169608473778))
 
 
 def attach_needle(needle, link, T_offset):
@@ -83,7 +83,7 @@ def attach_needle(needle, link, T_offset):
         #
         # print('link: ', T_nINw_cmd)
 
-        T_delta, error_max = cartesian_interpolate_step_num(T_nINw, T_nINw_cmd, 0.01, 0.0005)
+        T_delta, error_max = cartesian_interpolate_step_num(T_nINw, T_nINw_cmd, 0.01, 0.005)
         r_delta = T_delta.M.GetRPY()
         print(T_delta.p)
         # print(T_delta.M)
@@ -102,7 +102,7 @@ def attach_needle(needle, link, T_offset):
         # T_nINw = get_obj_trans(needle)
 
     # Wait for the needle to get there
-    time.sleep(3)
+    time.sleep(5.0)
 
     # You should see the needle in the center of the two fingers.
     # If the gripper is not already closed, you shall have to manually
