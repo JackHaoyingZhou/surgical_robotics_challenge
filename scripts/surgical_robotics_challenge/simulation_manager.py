@@ -5,7 +5,7 @@ import surgical_robotics_challenge.units_conversion as units_conversion
 class SimulationObject:
     def __init__(self, ambf_object):
         self._object = ambf_object
-        self._joint_type = None # To distinguish between revolute and prismatic joints
+        self._joint_type = None  # To distinguish between revolute and prismatic joints
 
     def set_joint_types(self, joint_types):
         self._joint_type = joint_types

@@ -18,7 +18,8 @@ if __name__ == '__main__':
     # data_folder = os.path.join(dynamic_path, 'data_test')
     # rosbag_name_list = glob(os.path.join(data_folder, '*.bag'))
     # rosbag_name = rosbag_name_list[0]
-    rosbag_name = '/home/zhyjack/dVRK_LfD_simulation/data/test_4.bag'
+    # rosbag_name = '/home/zhyjack/dVRK_LfD_simulation/data/test_4.bag'
+    rosbag_name = '/ssd/test_new_1.bag'
     # output_folder = os.path.join(dynamic_path, 'test_image')
     #
     # if not os.path.exists(output_folder):
