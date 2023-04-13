@@ -97,11 +97,10 @@ class ControllerInterface:
         self.gui.App.update()
         new_jp = [x+y for x, y in zip(self.gui.jnt_cmds, [0.0, 0.05, -0.01, 0.0])]
         self._ecm.servo_jp(new_jp)
-        # if (not (self.leader_1.clutch_button_pressed or self.leader_2.clutch_button_pressed)) and \
-        #         (self.leader_1.coag_button_pressed and self.leader_2.coag_button_pressed):
-        msg = Float64MultiArray()
-        msg.data = new_jp
-        self._pub_ecm.publish(msg)
+        if (self.leader_1.coag_button_pressed and self.leader_2.coag_button_pressed):
+            msg = Float64MultiArray()
+            msg.data = new_jp
+            self._pub_ecm.publish(msg)
 
     # def update_camera_pose(self):
     #     self.gui.App.update()
@@ -125,7 +124,7 @@ class ControllerInterface:
             self.cmd1_rpy = self._T1_c_b.M * self.leader_1.measured_cp().M
             self.T1_IK = Frame(self.cmd1_rpy, self.cmd1_xyz)
             self.psm_1.servo_cp(self.T1_IK)
-        self.psm_1.set_jaw_angle(self.leader_1.get_jaw_angle())
+            self.psm_1.set_jaw_angle(self.leader_1.get_jaw_angle())
 
     def teleop_pair_2(self):
         if self.leader_2.coag_button_pressed or self.leader_2.clutch_button_pressed:
@@ -145,7 +144,7 @@ class ControllerInterface:
             self.cmd2_rpy = self._T2_c_b.M * self.leader_2.measured_cp().M
             self.T2_IK = Frame(self.cmd2_rpy, self.cmd2_xyz)
             self.psm_2.servo_cp(self.T2_IK)
-        self.psm_2.set_jaw_angle(self.leader_2.get_jaw_angle())
+            self.psm_2.set_jaw_angle(self.leader_2.get_jaw_angle())
 
     def update_arm_pose(self):
         self.update_T_b_c()
