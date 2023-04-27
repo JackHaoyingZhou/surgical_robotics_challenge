@@ -156,7 +156,7 @@ class AttachNeedle:
             # T_nINw = get_obj_trans(needle)
 
         # Wait for the needle to get there
-        time.sleep(5.0)
+        time.sleep(4.0)
 
         # You should see the needle in the center of the two fingers.
         # If the gripper is not already closed, you shall have to manually

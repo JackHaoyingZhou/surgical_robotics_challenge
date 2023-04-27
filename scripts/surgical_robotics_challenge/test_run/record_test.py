@@ -20,7 +20,8 @@ if __name__ == '__main__':
     # rosbag_name = rosbag_name_list[0]
     # rosbag_name = '/home/zhyjack/dVRK_LfD_simulation/data/test_4.bag'
     # rosbag_name = '/ssd/test_new_1.bag'
-    rosbag_name = '/ssd/test_new_2.bag'
+    # rosbag_name = '/ssd/test_new_2.bag'
+    rosbag_name='/home/jackzhy/dVRK_LfD_demo/data/test_new_2.bag'
     # output_folder = os.path.join(dynamic_path, 'test_image')
     #
     # if not os.path.exists(output_folder):
