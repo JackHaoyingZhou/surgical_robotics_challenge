@@ -5,4 +5,4 @@
 .idea/
 scripts/surgical_robotics_challenge.egg-info/
 scripts/build
-scripts/devel
+scripts/dist
