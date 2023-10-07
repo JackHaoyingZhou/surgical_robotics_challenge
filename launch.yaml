@@ -23,3 +23,9 @@ multibody configs:
   - "ADF/camera_frame.yaml" #16
   - "ADF/3dMed_phantom_with_thread.yaml" #17
   - "/home/jackzhy/SurgicalChallenge3DAssets/3d_med_phantom/V1.1/3dMed_phantom_with_thread.yaml" #18
+  - "/home/jackzhy/surgical_jmrr/SurgicalChallenge3DAssets/3d_med_phantom/v1.1_scale_up/3dMed_phantom_with_thread.yaml" #19
+  - "/home/jackzhy/surgical_jmrr/SurgicalChallenge3DAssets/3d_med_phantom/v1.1_scale_down/3dMed_phantom_with_thread.yaml" #20
+  - "/home/jackzhy/surgical_jmrr/SurgicalChallenge3DAssets/3d_med_phantom/v1.1_new_needle/3dMed_phantom_with_thread.yaml" #21
+  - "modified_models/needle_scaleup/phantom_with_thread.yaml" #22
+  - "modified_models/needle_scaledown/phantom_with_thread.yaml" #23
+  - "modified_models/needle_new/phantom_with_thread.yaml" #24
