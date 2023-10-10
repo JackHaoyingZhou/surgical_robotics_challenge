@@ -6,3 +6,14 @@
 scripts/surgical_robotics_challenge.egg-info/
 scripts/build
 scripts/dist
+
+.vscode/
+output/
+solution-scripts/autoutils.egg-info/
+.ipynb_checkpoints/
+to_erase
+*.pth
+__pycache__
+*.egg-info
+build
+*.txt.user
