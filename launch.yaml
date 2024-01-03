@@ -22,3 +22,4 @@ multibody configs:
   - "ADF/phantom_with_thread.yaml" #15
   - "ADF/camera_frame.yaml" #16
   - "ADF/3dMed_phantom_with_thread.yaml" #17
+  - "ADF/phantom_with_thread_newneedle_test.yaml" #18
